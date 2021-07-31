@@ -12,6 +12,10 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 public class Service
@@ -45,13 +49,13 @@ public class Service
         person.setState(scanner.next());
 
         System.out.println("Enter Zip:");
-        person.setZip(scanner.next());
+        person.setZip(scanner.nextInt());
 
         System.out.println("Enter Email:");
         person.setEmail(scanner.next());
 
         System.out.println("Enter Phone:");
-        person.setPhoneNumber(scanner.nextLong());
+        person.setPhoneNumber(scanner.next());
 
         System.out.println("Enter Book name to which you have to add contact");
         String bookName = scanner.next();
@@ -98,7 +102,7 @@ public class Service
         try
         {
             System.out.println("Reading Data From File :");
-            Files.lines(new File(addressBookFile).toPath()).map(line -> line.trim()).forEach(line -> System.out.println(line));
+            Files.lines(new File(addressBookFile).toPath()).map(String::trim).forEach(line -> System.out.println(line));
         }
         catch (IOException e)
         {
@@ -113,48 +117,45 @@ public class Service
             String enteredFirstName;
             System.out.println("Enter First name of contact to edit it ");
             enteredFirstName = scanner.next();
-            for (int i = 0; i < personList.size(); i++) {
-                if (personList.get(i).getFirstName().equals(enteredFirstName)) {
-                    System.out.println("Enter the field to edit:\n1.First Name\n2.Last Name\n3.Address\n4.city\n5.State\n6.Zip\n7.Phone\n8.Email");
-                    int userInput = scanner.nextInt();
-                    switch (userInput) {
-                        case 1:
-                            System.out.println("Enter new first name");
-                            personList.get(i).setFirstName(scanner.next());
-                            break;
-                        case 2:
-                            System.out.println("Enter new last name");
-                            personList.get(i).setLastName(scanner.next());
-                            break;
-                        case 3:
-                            System.out.println("Enter new Address");
-                            personList.get(i).setAddress(scanner.next());
-                            break;
-                        case 4:
-                            System.out.println("Enter new city");
-                            personList.get(i).setCity(scanner.next());
-                            break;
-                        case 5:
-                            System.out.println("Enter new state");
-                            personList.get(i).setState(scanner.next());
-                            break;
-                        case 6:
-                            System.out.println("Enter new zip");
-                            personList.get(i).setZip(scanner.next());
-                            break;
-                        case 7:
-                            System.out.println("Enter new phone number");
-                            personList.get(i).setPhoneNumber(scanner.nextLong());
-                            break;
-                        case 8:
-                            System.out.println("Enter new email");
-                            personList.get(i).setEmail(scanner.next());
-                            break;
-                        default:
-                            System.out.println("Invalid Entry");
+            personList.stream().filter(person -> person.getFirstName().equals(enteredFirstName)).forEach(person -> {
+                System.out.println("Enter the field to edit:\n1.First Name\n2.Last Name\n3.Address\n4.city\n5.State\n6.Zip\n7.Phone\n8.Email");
+                int userInput = scanner.nextInt();
+                switch (userInput) {
+                    case 1 -> {
+                        System.out.println("Enter new first name");
+                        person.setFirstName(scanner.next());
                     }
+                    case 2 -> {
+                        System.out.println("Enter new last name");
+                        person.setLastName(scanner.next());
+                    }
+                    case 3 -> {
+                        System.out.println("Enter new Address");
+                        person.setAddress(scanner.next());
+                    }
+                    case 4 -> {
+                        System.out.println("Enter new city");
+                        person.setCity(scanner.next());
+                    }
+                    case 5 -> {
+                        System.out.println("Enter new state");
+                        person.setState(scanner.next());
+                    }
+                    case 6 -> {
+                        System.out.println("Enter new zip");
+                        person.setZip(scanner.nextInt());
+                    }
+                    case 7 -> {
+                        System.out.println("Enter new phone number");
+                        person.setPhoneNumber(scanner.next());
+                    }
+                    case 8 -> {
+                        System.out.println("Enter new email");
+                        person.setEmail(scanner.next());
+                    }
+                    default -> System.out.println("Invalid Entry");
                 }
-            }
+            });
         }
     }
 
@@ -245,7 +246,7 @@ public class Service
                     .build();
             List<Person> ContactList = new ArrayList<>();
             addressBooks.entrySet().stream()
-                    .map(books->books.getKey())
+                    .map(Map.Entry::getKey)
                     .map(bookNames->{
                         return addressBooks.get(bookNames);
                     }).forEach(contacts ->{
@@ -352,5 +353,53 @@ public class Service
             e.printStackTrace();
         }
         return null;
+    }
+
+    private static Service addressBookDBService;
+
+    Service() {
+    }
+
+    public static Service getInstance() {
+        if (addressBookDBService == null)
+            addressBookDBService = new Service();
+        return addressBookDBService;
+    }
+
+    public List<Person> readData() throws AddressBookException {
+        String sql = "SELECT * FROM address_book; ";
+        return this.getAddressBookDataUsingDB(sql);
+    }
+
+    private List<Person> getAddressBookDataUsingDB(String sql) throws AddressBookException {
+        List<Person> addressBookList = new ArrayList<>();
+        try (Connection connection = AddressBookConnection.getConnection();) {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            addressBookList = this.getAddressBookData(resultSet);
+        } catch (SQLException e) {
+            throw new AddressBookException(e.getMessage(), AddressBookException.ExceptionType.DATABASE_EXCEPTION);
+        }
+        return addressBookList;
+    }
+
+    private List<Person> getAddressBookData(ResultSet resultSet) throws AddressBookException {
+        List<Person> addressBookList = new ArrayList<>();
+        try {
+            while (resultSet.next()) {
+                String firstName = resultSet.getString("FirstName");
+                String lastName = resultSet.getString("LastName");
+                String address = resultSet.getString("Address");
+                String city = resultSet.getString("City");
+                String state = resultSet.getString("State");
+                int zip = resultSet.getInt("Zip");
+                String phoneNo = resultSet.getString("Phone");
+                String email = resultSet.getString("Email");
+                addressBookList.add(new Person(firstName, lastName, address, city, state, zip , phoneNo, email));
+            }
+        } catch (SQLException e) {
+            throw new AddressBookException(e.getMessage(), AddressBookException.ExceptionType.DATABASE_EXCEPTION);
+        }
+        return addressBookList;
     }
 }

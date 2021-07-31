@@ -1,5 +1,7 @@
 package com.bridgelabz.address;
 
+import java.math.BigDecimal;
+
 public class Person
 {
     private String firstName;
@@ -8,8 +10,23 @@ public class Person
     private String city;
     private String state;
     private String email;
-    private String zip;
-    private long phoneNumber;
+    private int zip;
+    private String phoneNo;
+
+    public Person(String firstName, String lastName, String address, String city, String state, int zip, String phoneNo, String email) {
+        this.firstName=firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.phoneNo = phoneNo;
+        this.email = email;
+    }
+
+    public Person() {
+
+    }
 
     public String getFirstName() {
         return firstName;
@@ -59,20 +76,20 @@ public class Person
         this.email = email;
     }
 
-    public String getZip() {
+    public int getZip() {
         return zip;
     }
 
-    public void setZip(String zip) {
+    public void setZip(int zip) {
         this.zip = zip;
     }
 
-    public long getPhoneNumber() {
-        return phoneNumber;
+    public String getPhoneNumber() {
+        return phoneNo;
     }
 
-    public void setPhoneNumber(long phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhoneNumber(String phoneNo) {
+        this.phoneNo = phoneNo;
     }
 
     @Override
@@ -80,6 +97,6 @@ public class Person
         return "[" +"firstName=" + firstName + '\'' + ", lastName='" + lastName + '\'' +
                 ", address='" + address + '\'' + ", city='" + city + '\'' +
                 ", state='" +state + '\'' + ", zip='" + zip + '\'' +
-                ", phoneNo='" + phoneNumber+ '\'' + ", email='" + email + '\'' + ']';
+                ", phoneNo='" + phoneNo+ '\'' + ", email='" + email + '\'' + ']';
     }
 }
