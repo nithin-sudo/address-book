@@ -49,7 +49,7 @@ public class Service
         person.setState(scanner.next());
 
         System.out.println("Enter Zip:");
-        person.setZip(scanner.nextInt());
+        person.setZip(scanner.next());
 
         System.out.println("Enter Email:");
         person.setEmail(scanner.next());
@@ -143,7 +143,7 @@ public class Service
                     }
                     case 6 -> {
                         System.out.println("Enter new zip");
-                        person.setZip(scanner.nextInt());
+                        person.setZip(scanner.next());
                     }
                     case 7 -> {
                         System.out.println("Enter new phone number");
@@ -373,7 +373,7 @@ public class Service
 
     private List<Person> getAddressBookDataUsingDB(String sql) throws AddressBookException {
         List<Person> addressBookList = new ArrayList<>();
-        try (Connection connection = AddressBookConnection.getConnection();) {
+        try (Connection connection = AddressBookConnection.getConnection()) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
             addressBookList = this.getAddressBookDetails(resultSet);
@@ -392,7 +392,7 @@ public class Service
                 String address = resultSet.getString("Address");
                 String city = resultSet.getString("City");
                 String state = resultSet.getString("State");
-                int zip = resultSet.getInt("Zip");
+                String zip = resultSet.getString("Zip");
                 String phoneNo = resultSet.getString("Phone");
                 String email = resultSet.getString("Email");
                 addressBookList.add(new Person(firstName, lastName, address, city, state, zip , phoneNo, email));
@@ -464,5 +464,25 @@ public class Service
             throw new AddressBookException(e.getMessage(), AddressBookException.ExceptionType.DATABASE_EXCEPTION);
         }
         return count;
+    }
+    public Person addNewContact(String firstName, String lastName, String address, String city, String state,
+                                         String zip, String phoneNo, String email,String AddressBookType, String date) throws AddressBookException {
+        int id = -1;
+        Person addressBookData = null;
+        String query = String.format("INSERT INTO address_book(FirstName, LastName, Address, City, State, Zip, Phone, Email, AddressBookType,Date) values ('%s','%s,'%s','%s','%s','%s','%s','%s','%s','%s');",
+                firstName, lastName, address, city, state, zip, phoneNo, email,AddressBookType, date);
+        try (Connection connection = addressBookConnection.getConnection()) {
+            Statement statement = connection.createStatement();
+            int rowChanged = statement.executeUpdate(query, statement.RETURN_GENERATED_KEYS);
+            if (rowChanged == 1) {
+                ResultSet resultSet = statement.getGeneratedKeys();
+                if (resultSet.next())
+                    id = resultSet.getInt(1);
+            }
+            addressBookData = new Person(firstName, lastName, address, city, state, zip, phoneNo, email,AddressBookType, date);
+        } catch (SQLException e) {
+            throw new AddressBookException(e.getMessage(), AddressBookException.ExceptionType.DATABASE_EXCEPTION);
+        }
+        return addressBookData;
     }
 }

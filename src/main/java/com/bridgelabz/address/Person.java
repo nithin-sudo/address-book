@@ -3,16 +3,18 @@ package com.bridgelabz.address;
 
 public class Person
 {
+    private  String Date;
     private String firstName;
     private String lastName;
     private String address;
     private String city;
     private String state;
     private String email;
-    private int zip;
+    private String zip;
     private String phoneNo;
+    private String AddressBookType;
 
-    public Person(String firstName, String lastName, String address, String city, String state, int zip, String phoneNo, String email) {
+    public Person(String firstName, String lastName, String address, String city, String state, String zip, String phoneNo, String email) {
         this.firstName=firstName;
         this.lastName = lastName;
         this.address = address;
@@ -22,10 +24,22 @@ public class Person
         this.phoneNo = phoneNo;
         this.email = email;
     }
-
+    public Person(String firstName, String lastName, String address, String city, String state, String zip, String phoneNo, String email,String AddressBookType,String Date) {
+        this.firstName=firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.phoneNo = phoneNo;
+        this.email = email;
+        this.AddressBookType =AddressBookType;
+        this.Date = Date;
+    }
     public Person() {
 
     }
+
 
     public String getFirstName() {
         return firstName;
@@ -66,7 +80,13 @@ public class Person
     public void setState(String state) {
         this.state = state;
     }
+    public String getZip() {
+        return zip;
+    }
 
+    public void setZip(String zip) {
+        this.zip = zip;
+    }
     public String getEmail() {
         return email;
     }
@@ -74,13 +94,19 @@ public class Person
     public void setEmail(String email) {
         this.email = email;
     }
-
-    public int getZip() {
-        return zip;
+    public String getAddressBookType() {
+        return AddressBookType;
     }
 
-    public void setZip(int zip) {
-        this.zip = zip;
+    public void setAddressBookType(String addressBookType) {
+        AddressBookType = addressBookType;
+    }
+    public String getDate() {
+        return Date;
+    }
+
+    public void setDate(String date) {
+        Date = date;
     }
 
     public String getPhoneNumber() {
@@ -142,10 +168,11 @@ public class Person
                 return false;
         } else if (!state.equals(other.state))
             return false;
-        if (zip == 0) {
-            if (other.zip != 0)
+        if (zip == null) {
+            if (other.zip != null)
                 return false;
-        }
+        } else if (!zip.equals(other.zip))
+            return false;
         return true;
     }
 

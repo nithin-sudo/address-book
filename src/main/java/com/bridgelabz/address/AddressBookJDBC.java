@@ -25,6 +25,7 @@ public class AddressBookJDBC {
             this.addressBookList = addressBookDBService.readData();
         return this.addressBookList;
     }
+
     public void updateRecord(String firstname, String address) throws AddressBookException {
         int result = addressBookDBService.updateAddressBookData(firstname, address);
         if (result == 0)
@@ -60,7 +61,14 @@ public class AddressBookJDBC {
             throw new AddressBookException(e.getMessage(), AddressBookException.ExceptionType.DATABASE_EXCEPTION);
         }
     }
+
     public int readAddressBookData(String function, String city) throws AddressBookException {
         return addressBookDBService.readDataBasedOnCity(function, city);
+    }
+
+    public void addNewContact(String firstName, String lastName, String address, String city, String state, String zip,
+                              String phone, String email,String AddressBookType, String date) throws AddressBookException {
+        addressBookList.add(addressBookDBService.addNewContact(firstName, lastName, address, city, state, zip, phone,
+                email,AddressBookType, date));
     }
 }
